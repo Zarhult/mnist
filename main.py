@@ -26,16 +26,23 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(128, 10)
 
     def forward(self, x):
+        #print(f"Start: {x.size()}")
         x = self.conv1(x)
+        #print(f"Conv1: {x.size()}")
         x = F.elu(x)
         x = F.max_pool2d(x, 2)
+        #print(f"Max pool: {x.size()}")
         x = self.conv2(x)
+        #print(f"Conv2: {x.size()}")
         x = F.elu(x)
         x = F.max_pool2d(x, 2)
+        #print(f"Max pool: {x.size()}")
         x = self.conv3(x)
+        #print(f"Conv3: {x.size()}")
         x = F.elu(x)
         x = self.dropout1(x)
         x = self.conv4(x)
+        #print(f"Conv4: {x.size()}")
         x = F.elu(x)
         x = torch.flatten(x, 1)
         x = self.fc1(x)
@@ -86,6 +93,7 @@ def test_image(img, model, device):
     # image must be 28x28
     # convert to expected format
     transform=transforms.Compose([
+        transforms.Resize((28,28)),
         transforms.Grayscale(num_output_channels=1),
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,))
@@ -189,6 +197,8 @@ def main():
         if args.input_image:
             img = Image.open(args.input_image)
             test_image(img, model, device)
+        else:
+            print("Model already exists, use --ignore-existing to train a new one.")
 
     if args.save_model:
         torch.save(model.state_dict(), model_filename)
